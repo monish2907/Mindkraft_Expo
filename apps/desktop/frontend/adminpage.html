@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MindKraft – Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0d0f1a;
+            --sidebar: #111320;
+            --card: #161929;
+            --card2: #1c2038;
+            --border: rgba(255, 255, 255, 0.07);
+            --accent: #7c6ef7;
+            --accent2: #f06292;
+            --accent3: #43e8a0;
+            --accent4: #f5a623;
+            --text: #e8eaf6;
+            --muted: #7b82a8;
+            --danger: #ef5350;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(124, 110, 247, 0.4);
+            border-radius: 4px;
+        }
+
+        /* ── Sidebar ── */
+        #sidebar {
+            width: 240px;
+            min-height: 100vh;
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
+        }
+
+        .sidebar-logo {
+            padding: 28px 24px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-logo h1 {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-logo p {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 2px;
+            letter-spacing: 0.04em;
+        }
+
+        .nav-section {
+            flex: 1;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 12px 12px 6px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--muted);
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item:hover {
+            background: rgba(124, 110, 247, 0.1);
+            color: var(--text);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(124, 110, 247, 0.25), rgba(240, 98, 146, 0.15));
+            color: #fff;
+            box-shadow: 0 0 0 1px rgba(124, 110, 247, 0.3);
+        }
+
+        .nav-item .icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .nav-item.active .icon {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+        }
+
+        .nav-item:not(.active) .icon {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-footer {
+            padding: 16px 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .admin-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .admin-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .admin-info p {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .admin-info span {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        /* ── Main layout ── */
+        #main {
+            margin-left: 240px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ── Topbar ── */
+        #topbar {
+            height: 64px;
+            background: rgba(13, 15, 26, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            position: sticky;
+            top: 0;
+            z-index: 99;
+        }
+
+        .topbar-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .topbar-title span {
+            color: var(--muted);
+            font-weight: 400;
+            font-size: 14px;
+            margin-left: 8px;
+        }
+
+        .btn-logout {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 18px;
+            border-radius: 8px;
+            border: 1px solid rgba(239, 83, 80, 0.35);
+            background: rgba(239, 83, 80, 0.1);
+            color: #ef5350;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-logout:hover {
+            background: rgba(239, 83, 80, 0.2);
+            border-color: rgba(239, 83, 80, 0.6);
+            transform: translateY(-1px);
+        }
+
+        /* ── Content area ── */
+        #content {
+            flex: 1;
+            padding: 28px;
+            overflow-y: auto;
+            animation: pageIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes pageIn {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── Dashboard overview cards ── */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .stat-info p {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .stat-info span {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        /* ── Section headings ── */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .section-header p {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        /* ── Cards ── */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+        }
+
+        .card+.card {
+            margin-top: 16px;
+        }
+
+        /* ── Create Exam Upload ── */
+        .upload-zone {
+            border: 2px dashed rgba(124, 110, 247, 0.4);
+            border-radius: 14px;
+            padding: 48px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            background: rgba(124, 110, 247, 0.04);
+        }
+
+        .upload-zone:hover,
+        .upload-zone.drag-over {
+            border-color: var(--accent);
+            background: rgba(124, 110, 247, 0.1);
+        }
+
+        .upload-zone .upload-icon {
+            font-size: 52px;
+            margin-bottom: 12px;
+        }
+
+        .upload-zone h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .upload-zone p {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .upload-zone input[type=file] {
+            display: none;
+        }
+
+        .uploaded-file {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: rgba(67, 232, 160, 0.08);
+            border: 1px solid rgba(67, 232, 160, 0.25);
+            border-radius: 10px;
+            margin-top: 14px;
+        }
+
+        .uploaded-file .file-icon {
+            font-size: 22px;
+        }
+
+        .uploaded-file .file-name {
+            font-size: 13px;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .uploaded-file .file-size {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .remove-file {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--muted);
+            margin-bottom: 7px;
+            display: block;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 11px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            border-color: var(--accent);
+        }
+
+        .form-select option {
+            background: #1c2038;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .btn-primary {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+            box-shadow: 0 4px 16px rgba(124, 110, 247, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(124, 110, 247, 0.45);
+        }
+
+        .btn-secondary {
+            padding: 11px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.09);
+        }
+
+        /* ── Table ── */
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody tr {
+            transition: background 0.15s;
+        }
+
+        tbody tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        tbody td {
+            padding: 14px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-green {
+            background: rgba(67, 232, 160, 0.15);
+            color: #43e8a0;
+        }
+
+        .badge-yellow {
+            background: rgba(245, 166, 35, 0.15);
+            color: #f5a623;
+        }
+
+        .badge-red {
+            background: rgba(239, 83, 80, 0.15);
+            color: #ef5350;
+        }
+
+        .badge-blue {
+            background: rgba(124, 110, 247, 0.15);
+            color: #7c6ef7;
+        }
+
+        .action-btn {
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .action-btn.view {
+            background: rgba(124, 110, 247, 0.15);
+            color: var(--accent);
+        }
+
+        .action-btn.view:hover {
+            background: rgba(124, 110, 247, 0.3);
+        }
+
+        .action-btn.download {
+            background: rgba(67, 232, 160, 0.12);
+            color: var(--accent3);
+            margin-left: 6px;
+        }
+
+        .action-btn.download:hover {
+            background: rgba(67, 232, 160, 0.25);
+        }
+
+        /* ── Report / Charts ── */
+        .report-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .chart-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 22px;
+        }
+
+        .chart-card h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .chart-card p {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 18px;
+        }
+
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bar-label {
+            font-size: 12px;
+            color: var(--muted);
+            width: 56px;
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .bar-val {
+            font-size: 12px;
+            font-weight: 600;
+            width: 36px;
+            text-align: right;
+        }
+
+        .donut-wrap {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .donut-svg {
+            flex-shrink: 0;
+        }
+
+        .donut-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .score-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .score-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .score-name {
+            font-size: 13px;
+            font-weight: 500;
+            width: 130px;
+            flex-shrink: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .score-bar {
+            flex: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            border-radius: 6px;
+        }
+
+        .score-val {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            width: 40px;
+            text-align: right;
+        }
+
+        /* ── Empty / success states ── */
+        .success-msg {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 18px;
+            background: rgba(67, 232, 160, 0.1);
+            border: 1px solid rgba(67, 232, 160, 0.3);
+            border-radius: 10px;
+            margin-top: 16px;
+            font-size: 13px;
+            color: #43e8a0;
+        }
+
+        /* ── Topbar search ── */
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .topbar-date {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        /* ── Responsive ── */
+        @media(max-width:860px) {
+            .report-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef, useEffect } = React;
+
+        /* ───────── data ───────── */
+        const SUBMISSIONS = [
+            { id: 1, name: "Arjun Sharma", exam: "Data Structures Mid-Term", submitted: "20 Feb 2026, 10:12 AM", score: 88, status: "Graded" },
+            { id: 2, name: "Priya Menon", exam: "Data Structures Mid-Term", submitted: "20 Feb 2026, 11:34 AM", score: 74, status: "Graded" },
+            { id: 3, name: "Rahul Verma", exam: "Operating Systems Quiz", submitted: "19 Feb 2026, 09:05 AM", score: 92, status: "Graded" },
+            { id: 4, name: "Sneha Pillai", exam: "Operating Systems Quiz", submitted: "19 Feb 2026, 03:22 PM", score: 61, status: "Graded" },
+            { id: 5, name: "Karan Nair", exam: "Algorithms Final", submitted: "18 Feb 2026, 02:00 PM", score: null, status: "Pending" },
+            { id: 6, name: "Divya Rao", exam: "Algorithms Final", submitted: "18 Feb 2026, 04:55 PM", score: null, status: "Pending" },
+            { id: 7, name: "Aditya Singh", exam: "DBMS Unit Test", submitted: "17 Feb 2026, 08:40 AM", score: 57, status: "Graded" },
+            { id: 8, name: "Lakshmi Iyer", exam: "DBMS Unit Test", submitted: "17 Feb 2026, 12:10 PM", score: 45, status: "Review" },
+        ];
+
+        const GRADE_DATA = [
+            { grade: "A+", val: 22, color: "#43e8a0" },
+            { grade: "A", val: 35, color: "#7c6ef7" },
+            { grade: "B", val: 28, color: "#f5a623" },
+            { grade: "C", val: 10, color: "#f06292" },
+            { grade: "F", val: 5, color: "#ef5350" },
+        ];
+
+        const SCORE_TOP = [
+            { name: "Rahul Verma", score: 92, color: "#43e8a0" },
+            { name: "Arjun Sharma", score: 88, color: "#7c6ef7" },
+            { name: "Priya Menon", score: 74, color: "#f5a623" },
+            { name: "Sneha Pillai", score: 61, color: "#f06292" },
+            { name: "Aditya Singh", score: 57, color: "#ef9a50" },
+            { name: "Lakshmi Iyer", score: 45, color: "#ef5350" },
+        ];
+
+        /* ───────── helpers ───────── */
+        function statusBadge(s) {
+            const map = { Graded: "badge-green", Pending: "badge-yellow", Review: "badge-blue" };
+            return <span className={`badge ${map[s] || "badge-red"}`}>{s}</span>;
+        }
+
+        /* ───────── pages ───────── */
+
+        /* Dashboard home */
+        function Dashboard() {
+            const stats = [
+                { icon: "📄", label: "Total Exams", val: 12, color: "rgba(124,110,247,0.25)" },
+                { icon: "👥", label: "Submissions", val: 148, color: "rgba(240,98,146,0.22)" },
+                { icon: "⏳", label: "Pending Review", val: 14, color: "rgba(245,166,35,0.22)" },
+                { icon: "🎓", label: "Avg Score", val: "73%", color: "rgba(67,232,160,0.22)" },
+            ];
+            return (
+                <div>
+                    <div style={{ marginBottom: 28 }}>
+                        <h2 style={{ fontSize: 22, fontWeight: 700 }}>Welcome back, <span style={{ background: "linear-gradient(135deg,#7c6ef7,#f06292)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Admin</span> 👋</h2>
+                        <p style={{ color: "var(--muted)", fontSize: 14, marginTop: 4 }}>Here's what's happening with your exams today.</p>
+                    </div>
+                    <div className="stat-grid">
+                        {stats.map(s => (
+                            <div className="stat-card" key={s.label}>
+                                <div className="stat-icon" style={{ background: s.color }}>{s.icon}</div>
+                                <div className="stat-info">
+                                    <p>{s.val}</p>
+                                    <span>{s.label}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="card">
+                        <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 14 }}>Recent Activity</h3>
+                        {[
+                            { text: "Rahul Verma submitted Operating Systems Quiz", time: "2h ago", dot: "#43e8a0" },
+                            { text: "New exam 'Algorithms Final' created", time: "5h ago", dot: "#7c6ef7" },
+                            { text: "Lakshmi Iyer's submission flagged for review", time: "Yesterday", dot: "#f5a623" },
+                            { text: "Data Structures Mid-Term graded (35 students)", time: "2 days ago", dot: "#f06292" },
+                        ].map((a, i) => (
+                            <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 0", borderBottom: i < 3 ? "1px solid var(--border)" : "none" }}>
+                                <div style={{ width: 8, height: 8, borderRadius: "50%", background: a.dot, flexShrink: 0 }} />
+                                <span style={{ flex: 1, fontSize: 13 }}>{a.text}</span>
+                                <span style={{ fontSize: 11, color: "var(--muted)", flexShrink: 0 }}>{a.time}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        /* Create Exam */
+        function CreateExam() {
+            const [file, setFile] = useState(null);
+            const [drag, setDrag] = useState(false);
+            const [submitted, setSubmitted] = useState(false);
+            const [form, setForm] = useState({ title: "", subject: "", duration: "", date: "", totalMarks: "" });
+            const fileRef = useRef();
+
+            function handleFile(f) { if (f) setFile(f); }
+            function onDrop(e) { e.preventDefault(); setDrag(false); handleFile(e.dataTransfer.files[0]); }
+            function onInputChange(e) { setForm(p => ({ ...p, [e.target.name]: e.target.value })); }
+            function handleSubmit(e) {
+                e.preventDefault();
+                if (!file) { alert("Please upload an exam file."); return; }
+                setSubmitted(true);
+            }
+
+            if (submitted) return (
+                <div>
+                    <div className="section-header"><div><h2>Create Exam</h2></div></div>
+                    <div className="card" style={{ textAlign: "center", padding: "48px 24px" }}>
+                        <div style={{ fontSize: 56, marginBottom: 16 }}>🎉</div>
+                        <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Exam Published!</h3>
+                        <p style={{ color: "var(--muted)", fontSize: 14, marginBottom: 24 }}>
+                            <strong style={{ color: "var(--text)" }}>{form.title || "New Exam"}</strong> has been created and is now available for students.
+                        </p>
+                        <button className="btn-primary" onClick={() => { setSubmitted(false); setFile(null); setForm({ title: "", subject: "", duration: "", date: "", totalMarks: "" }); }}>
+                            + Create Another Exam
+                        </button>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div>
+                    <div className="section-header">
+                        <div><h2>Create Exam</h2><p>Upload exam paper and configure exam settings</p></div>
+                    </div>
+                    <form onSubmit={handleSubmit}>
+                        <div className="card" style={{ marginBottom: 16 }}>
+                            <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Exam Details</h3>
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label className="form-label">Exam Title *</label>
+                                    <input className="form-input" name="title" placeholder="e.g. Data Structures Mid-Term" value={form.title} onChange={onInputChange} required />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Subject *</label>
+                                    <select className="form-select" name="subject" value={form.subject} onChange={onInputChange} required>
+                                        <option value="">Select subject</option>
+                                        <option>Data Structures</option>
+                                        <option>Operating Systems</option>
+                                        <option>Algorithms</option>
+                                        <option>DBMS</option>
+                                        <option>Computer Networks</option>
+                                        <option>Software Engineering</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label className="form-label">Duration (minutes) *</label>
+                                    <input className="form-input" name="duration" type="number" placeholder="e.g. 90" value={form.duration} onChange={onInputChange} required />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Total Marks *</label>
+                                    <input className="form-input" name="totalMarks" type="number" placeholder="e.g. 100" value={form.totalMarks} onChange={onInputChange} required />
+                                </div>
+                            </div>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label">Scheduled Date & Time *</label>
+                                <input className="form-input" name="date" type="datetime-local" value={form.date} onChange={onInputChange} required />
+                            </div>
+                        </div>
+
+                        <div className="card">
+                            <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Upload Exam File</h3>
+                            <div
+                                className={`upload-zone${drag ? " drag-over" : ""}`}
+                                onClick={() => fileRef.current.click()}
+                                onDragOver={e => { e.preventDefault(); setDrag(true); }}
+                                onDragLeave={() => setDrag(false)}
+                                onDrop={onDrop}
+                            >
+                                <input ref={fileRef} type="file" accept=".pdf,.docx,.doc,.xlsx,.txt"
+                                    onChange={e => handleFile(e.target.files[0])} />
+                                <div className="upload-icon">📁</div>
+                                <h3>Drag & drop your file here</h3>
+                                <p style={{ marginTop: 4 }}>or click to browse — PDF, DOCX, XLSX supported (max 50 MB)</p>
+                            </div>
+
+                            {file && (
+                                <div className="uploaded-file">
+                                    <span className="file-icon">📄</span>
+                                    <span className="file-name">{file.name}</span>
+                                    <span className="file-size">{(file.size / 1024).toFixed(1)} KB</span>
+                                    <button type="button" className="remove-file" onClick={() => setFile(null)}>✕</button>
+                                </div>
+                            )}
+
+                            <div style={{ display: "flex", gap: 10, marginTop: 22 }}>
+                                <button type="submit" className="btn-primary">🚀 Publish Exam</button>
+                                <button type="button" className="btn-secondary">Save as Draft</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            );
+        }
+
+        /* View Submissions */
+        function ViewSubmissions() {
+            const [filter, setFilter] = useState("All");
+            const [search, setSearch] = useState("");
+            const filters = ["All", "Graded", "Pending", "Review"];
+            const filtered = SUBMISSIONS.filter(s => (filter === "All" || s.status === filter) && (s.name.toLowerCase().includes(search.toLowerCase()) || s.exam.toLowerCase().includes(search.toLowerCase())));
+
+            return (
+                <div>
+                    <div className="section-header">
+                        <div><h2>View Submissions</h2><p>{SUBMISSIONS.length} total submissions</p></div>
+                    </div>
+
+                    {/* Filters */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
+                        {filters.map(f => (
+                            <button key={f} onClick={() => setFilter(f)}
+                                style={{
+                                    padding: "7px 16px", borderRadius: 20, border: "1px solid", cursor: "pointer", fontFamily: "Inter", fontSize: 13, fontWeight: 500,
+                                    borderColor: filter === f ? "var(--accent)" : "var(--border)",
+                                    background: filter === f ? "rgba(124,110,247,0.2)" : "rgba(255,255,255,0.04)",
+                                    color: filter === f ? "var(--accent)" : "var(--muted)", transition: "all 0.2s"
+                                }}>
+                                {f}
+                            </button>
+                        ))}
+                        <input
+                            style={{
+                                marginLeft: "auto", padding: "8px 14px", borderRadius: 8, border: "1px solid var(--border)",
+                                background: "rgba(255,255,255,0.05)", color: "var(--text)", fontSize: 13, fontFamily: "Inter", outline: "none", minWidth: 200
+                            }}
+                            placeholder="🔍  Search student or exam…"
+                            value={search} onChange={e => setSearch(e.target.value)} />
+                    </div>
+
+                    <div className="card" style={{ padding: 0 }}>
+                        <div className="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Student Name</th>
+                                        <th>Exam</th>
+                                        <th>Submitted</th>
+                                        <th>Score</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filtered.length === 0
+                                        ? <tr><td colSpan={7} style={{ textAlign: "center", padding: 32, color: "var(--muted)" }}>No submissions found.</td></tr>
+                                        : filtered.map(s => (
+                                            <tr key={s.id}>
+                                                <td style={{ color: "var(--muted)", fontWeight: 500 }}>{String(s.id).padStart(2, "0")}</td>
+                                                <td style={{ fontWeight: 500 }}>{s.name}</td>
+                                                <td style={{ color: "var(--muted)" }}>{s.exam}</td>
+                                                <td style={{ color: "var(--muted)", fontSize: 12 }}>{s.submitted}</td>
+                                                <td style={{ fontWeight: 600, color: s.score >= 75 ? "#43e8a0" : s.score >= 50 ? "#f5a623" : s.score ? "#ef5350" : "var(--muted)" }}>
+                                                    {s.score != null ? `${s.score}/100` : "—"}
+                                                </td>
+                                                <td>{statusBadge(s.status)}</td>
+                                                <td>
+                                                    <button className="action-btn view">View</button>
+                                                    <button className="action-btn download">↓ PDF</button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        /* Report */
+        function Report() {
+            const graded = SUBMISSIONS.filter(s => s.score != null);
+            const avg = Math.round(graded.reduce((a, s) => a + s.score, 0) / graded.length);
+            const highest = Math.max(...graded.map(s => s.score));
+            const lowest = Math.min(...graded.map(s => s.score));
+            const passing = graded.filter(s => s.score >= 50).length;
+
+            const donutR = 52, ci = 2 * Math.PI * donutR;
+            const slices = [
+                { label: "Pass", pct: Math.round(passing / graded.length * 100), color: "#43e8a0" },
+                { label: "Fail", pct: Math.round((1 - passing / graded.length) * 100), color: "#ef5350" },
+            ];
+
+            return (
+                <div>
+                    <div className="section-header">
+                        <div><h2>Reports & Analytics</h2><p>Performance overview across all exams</p></div>
+                        <button className="btn-primary" style={{ fontSize: 13 }}>⬇ Export Report</button>
+                    </div>
+
+                    {/* Summary stats */}
+                    <div className="stat-grid" style={{ gridTemplateColumns: "repeat(4,1fr)", marginBottom: 16 }}>
+                        {[
+                            { label: "Avg Score", val: `${avg}%`, color: "rgba(124,110,247,0.25)" },
+                            { label: "Highest", val: `${highest}%`, color: "rgba(67,232,160,0.22)" },
+                            { label: "Lowest", val: `${lowest}%`, color: "rgba(239,83,80,0.22)" },
+                            { label: "Pass Rate", val: `${Math.round(passing / graded.length * 100)}%`, color: "rgba(245,166,35,0.22)" },
+                        ].map(s => (
+                            <div key={s.label} style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 20px" }}>
+                                <p style={{ fontSize: 26, fontWeight: 700 }}>{s.val}</p>
+                                <span style={{ fontSize: 12, color: "var(--muted)" }}>{s.label}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="report-grid">
+                        {/* Grade distribution bar chart */}
+                        <div className="chart-card">
+                            <h3>Grade Distribution</h3>
+                            <p>All students across all exams</p>
+                            <div className="bar-chart">
+                                {GRADE_DATA.map(g => (
+                                    <div className="bar-row" key={g.grade}>
+                                        <span className="bar-label">{g.grade}</span>
+                                        <div className="bar-track">
+                                            <div className="bar-fill" style={{ width: `${g.val}%`, background: g.color }} />
+                                        </div>
+                                        <span className="bar-val" style={{ color: g.color }}>{g.val}%</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Pass/Fail donut */}
+                        <div className="chart-card">
+                            <h3>Pass / Fail Ratio</h3>
+                            <p>Based on ≥ 50% threshold</p>
+                            <div className="donut-wrap">
+                                <svg width={130} height={130} className="donut-svg" viewBox="0 0 130 130">
+                                    <circle cx={65} cy={65} r={donutR} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={18} />
+                                    {/* Pass arc */}
+                                    <circle cx={65} cy={65} r={donutR} fill="none" stroke="#43e8a0" strokeWidth={18}
+                                        strokeDasharray={`${ci * slices[0].pct / 100} ${ci}`}
+                                        strokeLinecap="round"
+                                        transform="rotate(-90 65 65)" />
+                                    {/* Fail arc */}
+                                    <circle cx={65} cy={65} r={donutR} fill="none" stroke="#ef5350" strokeWidth={18}
+                                        strokeDasharray={`${ci * slices[1].pct / 100} ${ci}`}
+                                        strokeDashoffset={-ci * slices[0].pct / 100}
+                                        strokeLinecap="round"
+                                        transform="rotate(-90 65 65)" />
+                                    <text x={65} y={60} textAnchor="middle" fill="#fff" fontSize={18} fontWeight={700}>{slices[0].pct}%</text>
+                                    <text x={65} y={78} textAnchor="middle" fill="rgba(255,255,255,0.5)" fontSize={11}>Pass</text>
+                                </svg>
+                                <div className="donut-legend">
+                                    {slices.map(s => (
+                                        <div className="legend-item" key={s.label}>
+                                            <div className="legend-dot" style={{ background: s.color }} />
+                                            <span>{s.label} — <strong>{s.pct}%</strong></span>
+                                        </div>
+                                    ))}
+                                    <div style={{ marginTop: 8, fontSize: 12, color: "var(--muted)" }}>
+                                        {passing} of {graded.length} students passed
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Top scorers */}
+                    <div className="chart-card">
+                        <h3>Student Score Leaderboard</h3>
+                        <p style={{ marginBottom: 18 }}>Individual scores out of 100</p>
+                        <div className="score-list">
+                            {SCORE_TOP.map((s, i) => (
+                                <div className="score-row" key={i}>
+                                    <span style={{ fontSize: 13, color: "var(--muted)", width: 22, textAlign: "center" }}>{i + 1}</span>
+                                    <span className="score-name">{s.name}</span>
+                                    <div className="score-bar">
+                                        <div className="score-fill" style={{ width: `${s.score}%`, background: s.color }} />
+                                    </div>
+                                    <span className="score-val">{s.score}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        /* ───────── Main App ───────── */
+        function App() {
+            const [page, setPage] = useState("dashboard");
+            const [showLogoutConf, setShowLogoutConf] = useState(false);
+
+            const nav = [
+                { id: "dashboard", label: "Dashboard", icon: "🏠" },
+                { id: "create-exam", label: "Create Exam", icon: "➕" },
+                { id: "submissions", label: "View Submissions", icon: "📋" },
+                { id: "report", label: "Reports", icon: "📊" },
+            ];
+
+            const titles = { dashboard: "Dashboard", "create-exam": "Create Exam", submissions: "View Submissions", report: "Reports & Analytics" };
+            const dateStr = new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+
+            function doLogout() {
+                window.location.href = "loginpage.html";
+            }
+
+            function renderPage() {
+                switch (page) {
+                    case "create-exam": return <CreateExam />;
+                    case "submissions": return <ViewSubmissions />;
+                    case "report": return <Report />;
+                    default: return <Dashboard />;
+                }
+            }
+
+            return (
+                <>
+                    {/* Sidebar */}
+                    <nav id="sidebar">
+                        <div className="sidebar-logo">
+                            <h1>MindKraft</h1>
+                            <p>Exam Management Portal</p>
+                        </div>
+                        <div className="nav-section">
+                            <div className="nav-label">Menu</div>
+                            {nav.map(n => (
+                                <button key={n.id} className={`nav-item${page === n.id ? " active" : ""}`} onClick={() => setPage(n.id)}>
+                                    <div className="icon">{n.icon}</div>
+                                    {n.label}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="sidebar-footer">
+                            <div className="admin-badge">
+                                <div className="admin-avatar">A</div>
+                                <div className="admin-info">
+                                    <p>Admin User</p>
+                                    <span>Super Admin</span>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    {/* Main */}
+                    <div id="main">
+                        {/* Topbar */}
+                        <header id="topbar">
+                            <div>
+                                <span className="topbar-title">
+                                    {titles[page]}
+                                    <span>/ MindKraft</span>
+                                </span>
+                            </div>
+                            <div className="topbar-right">
+                                <span className="topbar-date">{dateStr}</span>
+                                <button className="btn-logout" onClick={() => setShowLogoutConf(true)}>
+                                    🚪 Logout
+                                </button>
+                            </div>
+                        </header>
+
+                        {/* Page content */}
+                        <main id="content" key={page}>
+                            {renderPage()}
+                        </main>
+                    </div>
+
+                    {/* Logout confirmation modal */}
+                    {showLogoutConf && (
+                        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999 }}>
+                            <div style={{ background: "var(--card2)", border: "1px solid var(--border)", borderRadius: 16, padding: 32, width: 340, textAlign: "center", animation: "pageIn 0.25s ease" }}>
+                                <div style={{ fontSize: 44, marginBottom: 12 }}>👋</div>
+                                <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Logout?</h3>
+                                <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 24 }}>You'll be redirected back to the login page.</p>
+                                <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+                                    <button className="btn-secondary" onClick={() => setShowLogoutConf(false)}>Cancel</button>
+                                    <button className="btn-logout" style={{ padding: "11px 24px", fontSize: 13, fontFamily: "Inter" }} onClick={doLogout}>Yes, Logout</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+</body>
+
+</html>
